@@ -1,8 +1,8 @@
-# app.py
-
 from flask import Flask, request, jsonify
 from flask_migrate import Migrate
 from models import db, Sweet, Vendor, VendorSweet
+from sqlalchemy.orm import Session
+
 import os
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -26,13 +26,13 @@ def home():
 
 @app.route('/vendors', methods=['GET'])
 def get_vendors():
-    vendors = Vendor.query.all()
+    vendors = db.session.query(Vendor).all()
     return jsonify([vendor.serialize() for vendor in vendors])
 
 
 @app.route('/vendors/<int:id>', methods=['GET'])
 def get_vendor(id):
-    vendor = Vendor.query.get(id)
+    vendor = db.session.get(Vendor, id)
     if vendor:
         vendor_data = vendor.serialize()
         vendor_data['vendor_sweets'] = [vs.serialize() for vs in vendor.vendor_sweets]
@@ -43,13 +43,13 @@ def get_vendor(id):
 
 @app.route('/sweets', methods=['GET'])
 def get_sweets():
-    sweets = Sweet.query.all()
+    sweets = db.session.query(Sweet).all()
     return jsonify([sweet.serialize() for sweet in sweets])
 
 
 @app.route('/sweets/<int:id>', methods=['GET'])
 def get_sweet(id):
-    sweet = Sweet.query.get(id)
+    sweet = db.session.get(Sweet, id)
     if sweet:
         return jsonify(sweet.serialize())
     else:
@@ -66,8 +66,8 @@ def create_vendor_sweet():
     if price is None or not isinstance(price, (int, float)) or price < 0:
         return jsonify({"errors": ["validation errors"]}), 400
 
-    vendor = Vendor.query.get(vendor_id)
-    sweet = Sweet.query.get(sweet_id)
+    vendor = db.session.get(Vendor, vendor_id)
+    sweet = db.session.get(Sweet, sweet_id)
 
     if not vendor or not sweet:
         return jsonify({"errors": ["Vendor or Sweet not found"]}), 404
@@ -81,7 +81,7 @@ def create_vendor_sweet():
 
 @app.route('/vendor_sweets/<int:id>', methods=['DELETE'])
 def delete_vendor_sweet(id):
-    vendor_sweet = VendorSweet.query.get(id)
+    vendor_sweet = db.session.get(VendorSweet, id)
     if vendor_sweet:
         db.session.delete(vendor_sweet)
         db.session.commit()
