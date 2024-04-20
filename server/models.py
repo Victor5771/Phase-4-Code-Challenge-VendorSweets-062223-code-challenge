@@ -47,7 +47,7 @@ class VendorSweet(db.Model, SerializerMixin):
 
     id = db.Column(db.Integer, primary_key=True)
     price = db.Column(db.Integer, nullable=False)
-    sweet_id = db.Column(db.Integer, db.ForeignKey('sweets.id'), nullable=False)  # Add sweet_id column
+    sweet_id = db.Column(db.Integer, db.ForeignKey('sweets.id'), nullable=False)  
     vendor_id = db.Column(db.Integer, db.ForeignKey('vendors.id'), nullable=False)
     
     sweet = relationship('Sweet', back_populates='vendor_sweets')
