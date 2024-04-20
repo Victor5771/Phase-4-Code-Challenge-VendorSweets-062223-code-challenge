@@ -1,8 +1,8 @@
-#!/usr/bin/env python3
+# app.py
 
-from models import db, Sweet, Vendor, VendorSweet
-from flask_migrate import Migrate
 from flask import Flask, request, jsonify
+from flask_migrate import Migrate
+from models import db, Sweet, Vendor, VendorSweet
 import os
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -61,8 +61,8 @@ def create_vendor_sweet():
     sweet_id = data.get('sweet_id')
     price = data.get('price')
 
-    if vendor_id is None or sweet_id is None or price is None:
-        return jsonify({"errors": ["Vendor ID, Sweet ID, and Price are required fields"]}), 400
+    if price is None or not isinstance(price, (int, float)) or price < 0:
+        return jsonify({"error": "Price must be a non-negative number"}), 400
 
     vendor = Vendor.query.get(vendor_id)
     sweet = Sweet.query.get(sweet_id)
@@ -90,4 +90,3 @@ def delete_vendor_sweet(id):
 
 if __name__ == '__main__':
     app.run(port=5555, debug=True)
-
