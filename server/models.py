@@ -1,5 +1,3 @@
-# models.py
-
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import MetaData, ForeignKey
 from sqlalchemy.orm import relationship, validates
@@ -47,9 +45,9 @@ class VendorSweet(db.Model, SerializerMixin):
 
     id = db.Column(db.Integer, primary_key=True)
     price = db.Column(db.Integer, nullable=False)
-    sweet_id = db.Column(db.Integer, db.ForeignKey('sweets.id'), nullable=False)  
     vendor_id = db.Column(db.Integer, db.ForeignKey('vendors.id'), nullable=False)
-    
+    sweet_id = db.Column(db.Integer, db.ForeignKey('sweets.id'), nullable=False)
+
     sweet = relationship('Sweet', back_populates='vendor_sweets')
     vendor = relationship('Vendor', back_populates='vendor_sweets')
     

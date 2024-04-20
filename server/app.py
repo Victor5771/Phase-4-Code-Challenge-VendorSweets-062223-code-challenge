@@ -34,7 +34,9 @@ def get_vendors():
 def get_vendor(id):
     vendor = Vendor.query.get(id)
     if vendor:
-        return jsonify(vendor.serialize())
+        vendor_data = vendor.serialize()
+        vendor_data['vendor_sweets'] = [vs.serialize() for vs in vendor.vendor_sweets]
+        return jsonify(vendor_data)
     else:
         return jsonify({"error": "Vendor not found"}), 404
 
@@ -62,7 +64,7 @@ def create_vendor_sweet():
     price = data.get('price')
 
     if price is None or not isinstance(price, (int, float)) or price < 0:
-        return jsonify({"error": "Price must be a non-negative number"}), 400
+        return jsonify({"errors": ["validation errors"]}), 400
 
     vendor = Vendor.query.get(vendor_id)
     sweet = Sweet.query.get(sweet_id)
@@ -74,7 +76,7 @@ def create_vendor_sweet():
     db.session.add(vendor_sweet)
     db.session.commit()
 
-    return jsonify(vendor_sweet.serialize()), 201
+    return jsonify(serialize_vendor_sweet(vendor_sweet)), 201
 
 
 @app.route('/vendor_sweets/<int:id>', methods=['DELETE'])
@@ -83,10 +85,20 @@ def delete_vendor_sweet(id):
     if vendor_sweet:
         db.session.delete(vendor_sweet)
         db.session.commit()
-        return jsonify({})
+        return '', 204
     else:
         return jsonify({"error": "VendorSweet not found"}), 404
 
+
+def serialize_vendor_sweet(vendor_sweet):
+    return {
+        'id': vendor_sweet.id,
+        'price': vendor_sweet.price,
+        'vendor_id': vendor_sweet.vendor_id,
+        'sweet_id': vendor_sweet.sweet_id,
+        'vendor': vendor_sweet.vendor.serialize(),
+        'sweet': vendor_sweet.sweet.serialize(),
+    }
 
 if __name__ == '__main__':
     app.run(port=5555, debug=True)
